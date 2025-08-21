@@ -1,3 +1,12 @@
+# =============================================================================
+# 안드로이드 프로젝트 .gitignore - 멀티플랫폼 개발 환경
+# 지원 툴: Android Studio, VS Code, IntelliJ IDEA, Claude Code
+# 지원 OS: macOS, Windows
+# =============================================================================
+
+# ================== 안드로이드 관련 ==================
+
+# 안드로이드 스튜디오 기본
 *.iml
 .gradle
 /local.properties
@@ -7,9 +16,155 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+
+# 빌드 결과물
+*.apk
+*.aab
+*.aar
+/app/build/
+/*/build/
+
+# 서명 파일 (중요 - 절대 커밋 금지!)
+*.jks
+*.keystore
+release.keystore
+debug.keystore
+key.properties
+keystore.properties
+
+# 프로가드
+/proguard/
+proguard-rules.pro.bak
+
+# 덱스 파일
+*.dex
+
+# 린트
+lint-results*.xml
+
+# 안드로이드 프로파일링
+*.hprof
+
+# ================== IDE 설정 ==================
+
+# IntelliJ IDEA (안드로이드 스튜디오 기반)
+/.idea/
+out/
+*.iws
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Claude Code 전용
+.claude/
+claude-config.json
+.claude-session
+*.claude
+
+# JetBrains IDE 계열 (IntelliJ IDEA, WebStorm 등)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ================== 운영체제 ==================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Icon?
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# ================== 개발 도구 ==================
+
+# 로그 파일
+*.log
+logs/
+*.log.*
+
+# 임시 파일
+*.tmp
+*.temp
+*.bak
+*.swp
+*~.nib
+*.swo
+*~
+
+# Node.js (React Native나 웹 컴포넌트 사용시)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ================== 파이어베이스 & 백엔드 ==================
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+firebase-debug.log
+firestore-debug.log
+
+# Fabric/Crashlytics
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# ================== 버전 관리 ==================
+
+# Git
+*.orig
+*.rej
+
+# ================== 기타 ==================
+
+# 압축 파일
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# 가상머신 크래시 로그
+hs_err_pid*
+
+# 로컬 환경 변수
+.env
+.env.local
+.env.*.local
+
+# IDE별 프로젝트 파일
+/.project
+/.settings/
+/.classpath
+
+# Kotlin/Native
+konan/
