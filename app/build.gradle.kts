@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.hilt)
     alias(libs.plugins.room)
@@ -65,11 +65,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
-    // Hilt를 위한 kapt 설정
-    kapt {
-        correctErrorTypes = true
-    }
 }
 
 // Room 스키마 디렉토리 설정
@@ -106,11 +101,11 @@ dependencies {
     // Room Database (로컬 저장용)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     // Dependency Injection
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Coroutines (비동기 처리)
