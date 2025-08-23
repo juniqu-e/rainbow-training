@@ -61,11 +61,16 @@ out/
 .vscode/
 *.code-workspace
 
-# Claude Code 전용
-.claude/
-claude-config.json
-.claude-session
-*.claude
+# Claude Code 관련 - 선택적 무시
+.claude/session/          # 세션 데이터는 무시
+.claude/cache/           # 캐시는 무시
+.claude-session          # 세션 파일 무시
+claude-config.json       # 개인 설정 무시
+
+# Claude Code 공유 파일 (커밋 대상)
+# .claude/commands/      # 팀 공유 명령어
+# .claude/settings.json  # 프로젝트 공통 설정
+# CLAUDE.md             # 프로젝트 가이드
 
 # JetBrains IDE 계열 (IntelliJ IDEA, WebStorm 등)
 .idea/
