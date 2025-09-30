@@ -15,7 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -175,7 +175,7 @@ private fun DifficultySectionHeader(
                 imageVector = if (isExpanded) {
                     Icons.Default.KeyboardArrowDown
                 } else {
-                    Icons.Default.KeyboardArrowRight
+                    Icons.AutoMirrored.Default.KeyboardArrowRight
                 },
                 contentDescription = if (isExpanded) "접기" else "펼치기",
                 tint = RainbowColors.Light.onSurfaceVariant
@@ -372,7 +372,7 @@ private fun StatItem(
     ) {
         Text(
             text = value,
-            style = RainbowTypography.titleSmall.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
             color = color
         )
         Text(

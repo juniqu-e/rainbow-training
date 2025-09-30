@@ -18,7 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
@@ -36,8 +36,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+// Pull-to-refresh imports removed - using simple refresh button instead
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -79,7 +78,7 @@ fun LevelSelectScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val pullToRefreshState = rememberPullToRefreshState()
+    // Removed pull-to-refresh for simplification
     
     // 에러 메시지가 있을 때 스낵바 표시
     LaunchedEffect(uiState.errorMessage) {
@@ -92,19 +91,7 @@ fun LevelSelectScreen(
         }
     }
     
-    // Pull-to-refresh 처리
-    LaunchedEffect(pullToRefreshState.isRefreshing) {
-        if (pullToRefreshState.isRefreshing) {
-            viewModel.refreshLevelData()
-        }
-    }
-    
-    // 새로고침 완료 시 Pull-to-refresh 상태 해제
-    LaunchedEffect(uiState.isRefreshing) {
-        if (!uiState.isRefreshing) {
-            pullToRefreshState.endRefresh()
-        }
-    }
+    // Pull-to-refresh removed for simplification
     
     Scaffold(
         topBar = {
@@ -112,39 +99,29 @@ fun LevelSelectScreen(
                 gameTypeDisplayInfo = viewModel.getGameTypeDisplayInfo(),
                 onNavigateBack = onNavigateBack,
                 onRefreshClick = { viewModel.refreshLevelData() },
-                isRefreshing = uiState.isRefreshing
+                isRefreshing = uiState.isLoading
             )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
-        Box(
+        LevelSelectContent(
+            uiState = uiState,
+            onLevelClick = { levelNumber ->
+                val validation = viewModel.validateGameStart(levelNumber)
+                if (validation.canStart) {
+                    onNavigateToGame(uiState.gameType, levelNumber)
+                } else {
+                    // 에러 메시지 표시 (스낵바를 통해)
+                    // 실제로는 ViewModel에서 에러 상태를 업데이트해야 함
+                }
+            },
+            onRetryClick = { viewModel.loadLevelData() },
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(pullToRefreshState.nestedScrollConnection)
-        ) {
-            LevelSelectContent(
-                uiState = uiState,
-                onLevelClick = { levelNumber ->
-                    val validation = viewModel.validateGameStart(levelNumber)
-                    if (validation.canStart) {
-                        onNavigateToGame(uiState.gameType, levelNumber)
-                    } else {
-                        // 에러 메시지 표시 (스낵바를 통해)
-                        // 실제로는 ViewModel에서 에러 상태를 업데이트해야 함
-                    }
-                },
-                onRetryClick = { viewModel.loadLevelData() },
-                modifier = Modifier.padding(paddingValues)
-            )
-            
-            // Pull-to-refresh 인디케이터
-            PullToRefreshContainer(
-                modifier = Modifier.align(Alignment.TopCenter),
-                state = pullToRefreshState
-            )
-        }
+                .padding(paddingValues)
+        )
     }
 }
 
@@ -177,7 +154,7 @@ private fun LevelSelectTopBar(
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = "뒤로 가기",
                     tint = RainbowColors.Primary
                 )

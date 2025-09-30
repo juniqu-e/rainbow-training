@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.juniquelab.rainbowtraining.presentation.theme.RainbowTrainingTheme
+import com.juniquelab.rainbowtraining.ui.theme.RainbowTrainingTheme
 
 /**
  * 색상 구별 게임에서 사용되는 개별 색상 카드 컴포넌트

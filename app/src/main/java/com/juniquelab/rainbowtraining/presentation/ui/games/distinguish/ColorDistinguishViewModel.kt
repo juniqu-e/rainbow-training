@@ -2,9 +2,9 @@ package com.juniquelab.rainbowtraining.presentation.ui.games.distinguish
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.juniquelab.rainbowtraining.domain.model.game.GameType
+import com.juniquelab.rainbowtraining.domain.model.common.GameType
 import com.juniquelab.rainbowtraining.domain.model.game.games.ColorDistinguishState
-import com.juniquelab.rainbowtraining.domain.usecase.game.GenerateColorChallengeUseCase
+import com.juniquelab.rainbowtraining.domain.usecase.data.GenerateColorChallengeUseCase
 import com.juniquelab.rainbowtraining.domain.usecase.level.CompleteLevelUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -63,26 +63,31 @@ class ColorDistinguishViewModel @Inject constructor(
             _isLoading.value = true
             _errorMessage.value = null
 
-            try {
-                // 레벨별 색상 챌린지 생성
-                val colorChallenge = generateColorChallengeUseCase(level)
-
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        level = level,
-                        colors = colorChallenge.colors,
-                        correctIndex = colorChallenge.correctIndex,
-                        selectedIndex = null,
-                        score = 0,
-                        requiredScore = colorChallenge.requiredScore,
-                        difficulty = colorChallenge.difficulty
-                    )
+            // 레벨별 색상 챌린지 생성
+            when (val result = generateColorChallengeUseCase(level)) {
+                is com.juniquelab.rainbowtraining.domain.model.common.Result.Success -> {
+                    val colorChallenge = result.data
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            level = level,
+                            colors = colorChallenge.colors,
+                            correctIndex = colorChallenge.correctIndex,
+                            selectedIndex = null,
+                            score = 0,
+                            requiredScore = colorChallenge.requiredScore,
+                            difficulty = colorChallenge.difficulty
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                _errorMessage.value = "게임 시작 중 오류가 발생했습니다: ${e.message}"
-            } finally {
-                _isLoading.value = false
+                is com.juniquelab.rainbowtraining.domain.model.common.Result.Error -> {
+                    _errorMessage.value = "게임 시작 중 오류가 발생했습니다: ${result.exception.message}"
+                }
+                is com.juniquelab.rainbowtraining.domain.model.common.Result.Loading -> {
+                    // 로딩 상태는 이미 처리됨
+                }
             }
+            
+            _isLoading.value = false
         }
     }
 
@@ -144,19 +149,24 @@ class ColorDistinguishViewModel @Inject constructor(
      */
     private fun generateNextChallenge() {
         viewModelScope.launch {
-            try {
-                val currentState = _uiState.value
-                val colorChallenge = generateColorChallengeUseCase(currentState.level)
-
-                _uiState.update { state ->
-                    state.copy(
-                        colors = colorChallenge.colors,
-                        correctIndex = colorChallenge.correctIndex,
-                        selectedIndex = null
-                    )
+            val currentState = _uiState.value
+            when (val result = generateColorChallengeUseCase(currentState.level)) {
+                is com.juniquelab.rainbowtraining.domain.model.common.Result.Success -> {
+                    val colorChallenge = result.data
+                    _uiState.update { state ->
+                        state.copy(
+                            colors = colorChallenge.colors,
+                            correctIndex = colorChallenge.correctIndex,
+                            selectedIndex = null
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                _errorMessage.value = "새 문제 생성 중 오류가 발생했습니다: ${e.message}"
+                is com.juniquelab.rainbowtraining.domain.model.common.Result.Error -> {
+                    _errorMessage.value = "새 문제 생성 중 오류가 발생했습니다: ${result.exception.message}"
+                }
+                is com.juniquelab.rainbowtraining.domain.model.common.Result.Loading -> {
+                    // 로딩 상태 처리 (필요시)
+                }
             }
         }
     }
@@ -183,24 +193,28 @@ class ColorDistinguishViewModel @Inject constructor(
         viewModelScope.launch {
             val currentState = _uiState.value
             
-            try {
-                // 레벨 완료 처리
-                val result = completeLevelUseCase(
-                    gameType = GameType.COLOR_DISTINGUISH,
-                    level = currentState.level,
-                    score = currentState.score
-                )
-
-                _gameCompleteState.value = GameCompleteState(
-                    level = currentState.level,
-                    finalScore = currentState.score,
-                    requiredScore = currentState.requiredScore,
-                    isPass = result.isPass,
-                    isNewBestScore = result.newBestScore,
-                    nextLevelUnlocked = result.nextLevelUnlocked
-                )
-            } catch (e: Exception) {
-                _errorMessage.value = "게임 완료 처리 중 오류가 발생했습니다: ${e.message}"
+            when (val result = completeLevelUseCase(
+                gameType = GameType.COLOR_DISTINGUISH,
+                level = currentState.level,
+                score = currentState.score
+            )) {
+                is com.juniquelab.rainbowtraining.domain.model.common.Result.Success -> {
+                    val completeResult = result.data
+                    _gameCompleteState.value = GameCompleteState(
+                        level = currentState.level,
+                        finalScore = currentState.score,
+                        requiredScore = currentState.requiredScore,
+                        isPass = completeResult.isPass,
+                        isNewBestScore = completeResult.isNewBestScore,
+                        nextLevelUnlocked = completeResult.nextLevelUnlocked
+                    )
+                }
+                is com.juniquelab.rainbowtraining.domain.model.common.Result.Error -> {
+                    _errorMessage.value = "게임 완료 처리 중 오류가 발생했습니다: ${result.exception.message}"
+                }
+                is com.juniquelab.rainbowtraining.domain.model.common.Result.Loading -> {
+                    // 로딩 상태 처리 (필요시)
+                }
             }
         }
     }

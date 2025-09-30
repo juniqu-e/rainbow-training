@@ -24,8 +24,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
-import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+// Pull-to-refresh imports removed - using simple refresh button instead
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,8 +64,6 @@ fun MainScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val pullToRefreshState = rememberPullToRefreshState()
-    
     // 에러 메시지가 있을 때 스낵바 표시
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let { message ->
@@ -78,25 +75,11 @@ fun MainScreen(
         }
     }
     
-    // Pull-to-refresh 처리
-    LaunchedEffect(pullToRefreshState.isRefreshing) {
-        if (pullToRefreshState.isRefreshing) {
-            viewModel.refreshProgress()
-        }
-    }
-    
-    // 새로고침 완료 시 Pull-to-refresh 상태 해제
-    LaunchedEffect(uiState.isRefreshing) {
-        if (!uiState.isRefreshing) {
-            pullToRefreshState.endRefresh()
-        }
-    }
-    
     Scaffold(
         topBar = {
             MainScreenTopBar(
                 onRefreshClick = { viewModel.refreshProgress() },
-                isRefreshing = uiState.isRefreshing
+                isRefreshing = uiState.isLoading
             )
         },
         snackbarHost = {
@@ -106,7 +89,7 @@ fun MainScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(pullToRefreshState.nestedScrollConnection)
+                .padding(paddingValues)
         ) {
             MainScreenContent(
                 uiState = uiState,
@@ -116,13 +99,7 @@ fun MainScreen(
                     }
                 },
                 onRetryClick = { viewModel.loadAllGameProgress() },
-                modifier = Modifier.padding(paddingValues)
-            )
-            
-            // Pull-to-refresh 인디케이터
-            PullToRefreshContainer(
-                modifier = Modifier.align(Alignment.TopCenter),
-                state = pullToRefreshState
+                modifier = Modifier.fillMaxSize()
             )
         }
     }

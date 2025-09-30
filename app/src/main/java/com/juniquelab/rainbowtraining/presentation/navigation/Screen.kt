@@ -1,6 +1,6 @@
 package com.juniquelab.rainbowtraining.presentation.navigation
 
-import com.juniquelab.rainbowtraining.domain.model.game.GameType
+import com.juniquelab.rainbowtraining.domain.model.common.GameType
 
 /**
  * 앱의 모든 화면을 정의하는 sealed class

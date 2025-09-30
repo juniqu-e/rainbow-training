@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.juniquelab.rainbowtraining.presentation.theme.RainbowTrainingTheme
+import com.juniquelab.rainbowtraining.ui.theme.RainbowTrainingTheme
 
 /**
  * 게임에서 현재 점수와 통과 점수를 진행률 바로 표시하는 컴포넌트
@@ -109,7 +109,7 @@ fun ScoreProgress(
                 )
 
                 Icon(
-                    imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Default.TrendingUp,
+                    imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.AutoMirrored.Default.TrendingUp,
                     contentDescription = if (isCompleted) "완료" else "진행중",
                     tint = if (isCompleted) completedColor else MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -219,7 +219,7 @@ fun ScoreProgressCompact(
         )
 
         LinearProgressIndicator(
-            progress = animatedProgress,
+            progress = { animatedProgress },
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 16.dp),

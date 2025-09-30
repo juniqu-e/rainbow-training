@@ -3,7 +3,7 @@ package com.juniquelab.rainbowtraining.data.mapper
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.juniquelab.rainbowtraining.data.local.entity.GameProgressEntity
-import com.juniquelab.rainbowtraining.domain.model.game.GameType
+import com.juniquelab.rainbowtraining.domain.model.common.GameType
 import com.juniquelab.rainbowtraining.domain.model.progress.GameProgress
 import kotlinx.datetime.Clock
 import javax.inject.Inject

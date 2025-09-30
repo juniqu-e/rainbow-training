@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.juniquelab.rainbowtraining.domain.model.game.GameType
+import com.juniquelab.rainbowtraining.domain.model.common.GameType
 import com.juniquelab.rainbowtraining.presentation.ui.games.distinguish.ColorDistinguishScreen
 import com.juniquelab.rainbowtraining.presentation.ui.level.LevelSelectScreen
 import com.juniquelab.rainbowtraining.presentation.ui.main.MainScreen
@@ -58,7 +58,7 @@ fun RainbowNavigation(
             }
         ) {
             MainScreen(
-                onGameModeSelected = { gameType ->
+                onNavigateToLevelSelect = { gameType ->
                     navController.navigate(Screen.LevelSelect.createRoute(gameType))
                 }
             )
@@ -98,11 +98,10 @@ fun RainbowNavigation(
             
             if (gameType != null && NavigationUtils.isValidGameType(gameType.name)) {
                 LevelSelectScreen(
-                    gameType = gameType,
                     onNavigateBack = {
                         navController.popBackStack()
                     },
-                    onLevelSelected = { level ->
+                    onNavigateToGame = { _, level ->
                         navController.navigate(Screen.Game.createRoute(gameType, level))
                     }
                 )

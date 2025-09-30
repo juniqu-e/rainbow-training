@@ -274,7 +274,7 @@ private fun VerticalScoreDisplay(
         
         // 목표 점수
         Text(
-            text = "목표: $targetScore점",
+            text = "목표: ${targetScore}점",
             style = RainbowTypography.bodyMedium,
             color = RainbowColors.Light.onSurfaceVariant,
             textAlign = TextAlign.Center

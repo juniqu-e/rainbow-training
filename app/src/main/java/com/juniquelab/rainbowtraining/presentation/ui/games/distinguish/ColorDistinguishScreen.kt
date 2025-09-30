@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.juniquelab.rainbowtraining.domain.model.game.games.ColorDistinguishState
-import com.juniquelab.rainbowtraining.presentation.theme.RainbowTrainingTheme
+import com.juniquelab.rainbowtraining.ui.theme.RainbowTrainingTheme
 import com.juniquelab.rainbowtraining.presentation.ui.games.distinguish.components.ColorGrid
 
 /**
@@ -283,7 +283,7 @@ private fun ScoreProgressCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             LinearProgressIndicator(
-                progress = progress,
+                progress = { progress },
                 modifier = Modifier.fillMaxWidth(),
                 color = if (isComplete) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant

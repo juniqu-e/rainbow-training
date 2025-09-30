@@ -40,7 +40,6 @@ class GetUnlockedLevelsUseCase @Inject constructor(
                             level = level,
                             difficulty = LevelCalculator.getDifficultyForLevel(level),
                             requiredScore = LevelCalculator.getRequiredScore(level),
-                            difficultyName = LevelCalculator.getDifficultyName(level),
                             isUnlocked = gameProgress.isLevelUnlocked(level, requiredScores),
                             bestScore = gameProgress.getBestScore(level),
                             isCompleted = gameProgress.isLevelCompleted(level, requiredScores[level] ?: 0)

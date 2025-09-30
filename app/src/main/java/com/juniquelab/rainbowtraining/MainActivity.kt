@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.juniquelab.rainbowtraining.presentation.navigation.RainbowNavigation
-import com.juniquelab.rainbowtraining.presentation.theme.RainbowTrainingTheme
+import com.juniquelab.rainbowtraining.ui.theme.RainbowTrainingTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 /**

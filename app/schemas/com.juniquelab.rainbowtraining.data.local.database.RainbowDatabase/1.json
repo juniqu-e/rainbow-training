@@ -1,0 +1,64 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "37cc76410cab06fe6c492f92a88770b1",
+    "entities": [
+      {
+        "tableName": "game_progress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`gameType` TEXT NOT NULL, `currentLevel` INTEGER NOT NULL, `levelScores` TEXT NOT NULL, `totalScore` INTEGER NOT NULL, `completedLevels` INTEGER NOT NULL, `lastPlayedAt` TEXT NOT NULL, PRIMARY KEY(`gameType`))",
+        "fields": [
+          {
+            "fieldPath": "gameType",
+            "columnName": "gameType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentLevel",
+            "columnName": "currentLevel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "levelScores",
+            "columnName": "levelScores",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalScore",
+            "columnName": "totalScore",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedLevels",
+            "columnName": "completedLevels",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastPlayedAt",
+            "columnName": "lastPlayedAt",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "gameType"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '37cc76410cab06fe6c492f92a88770b1')"
+    ]
+  }
+}

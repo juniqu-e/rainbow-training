@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.juniquelab.rainbowtraining.presentation.theme.RainbowTrainingTheme
+import com.juniquelab.rainbowtraining.ui.theme.RainbowTrainingTheme
 
 /**
  * 게임 화면 상단 헤더 컴포넌트

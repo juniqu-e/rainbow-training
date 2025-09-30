@@ -49,7 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.juniquelab.rainbowtraining.presentation.theme.RainbowTrainingTheme
+import com.juniquelab.rainbowtraining.ui.theme.RainbowTrainingTheme
 import kotlinx.coroutines.delay
 
 /**
@@ -282,7 +282,7 @@ private fun ScoreSection(
 
             // 통과 점수 대비
             Text(
-                text = "통과 점수: $requiredScore점",
+                text = "통과 점수: ${requiredScore}점",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -292,7 +292,7 @@ private fun ScoreSection(
             if (scoreDifference != 0) {
                 Text(
                     text = if (scoreDifference > 0) 
-                        "+$scoreDifference점 초과 달성!" 
+                        "+${scoreDifference}점 초과 달성!" 
                     else 
                         "${-scoreDifference}점 부족",
                     style = MaterialTheme.typography.bodySmall,
