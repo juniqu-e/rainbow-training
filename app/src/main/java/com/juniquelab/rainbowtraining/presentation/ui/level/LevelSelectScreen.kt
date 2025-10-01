@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -97,9 +96,7 @@ fun LevelSelectScreen(
         topBar = {
             LevelSelectTopBar(
                 gameTypeDisplayInfo = viewModel.getGameTypeDisplayInfo(),
-                onNavigateBack = onNavigateBack,
-                onRefreshClick = { viewModel.refreshLevelData() },
-                isRefreshing = uiState.isLoading
+                onNavigateBack = onNavigateBack
             )
         },
         snackbarHost = {
@@ -132,9 +129,7 @@ fun LevelSelectScreen(
 @Composable
 private fun LevelSelectTopBar(
     gameTypeDisplayInfo: GameTypeDisplayInfo,
-    onNavigateBack: () -> Unit,
-    onRefreshClick: () -> Unit,
-    isRefreshing: Boolean
+    onNavigateBack: () -> Unit
 ) {
     TopAppBar(
         title = {
@@ -158,26 +153,6 @@ private fun LevelSelectTopBar(
                     contentDescription = "뒤로 가기",
                     tint = RainbowColors.Primary
                 )
-            }
-        },
-        actions = {
-            IconButton(
-                onClick = onRefreshClick,
-                enabled = !isRefreshing
-            ) {
-                if (isRefreshing) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(RainbowDimens.IconSize),
-                        color = RainbowColors.Primary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "새로고침",
-                        tint = RainbowColors.Primary
-                    )
-                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(

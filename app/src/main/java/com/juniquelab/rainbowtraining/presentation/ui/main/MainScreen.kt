@@ -1,26 +1,30 @@
 package com.juniquelab.rainbowtraining.presentation.ui.main
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -33,8 +37,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -106,7 +110,7 @@ fun MainScreen(
 }
 
 /**
- * 메인 화면 상단 앱바
+ * 메인 화면 상단 앱바 (심플한 디자인)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,33 +120,43 @@ private fun MainScreenTopBar(
 ) {
     TopAppBar(
         title = {
-            Text(
-                text = "🌈 색상 훈련",
-                style = RainbowTypography.headlineLarge.copy(fontWeight = FontWeight.Bold),
-                color = RainbowColors.Light.onSurface
-            )
-        },
-        actions = {
-            IconButton(
-                onClick = onRefreshClick,
-                enabled = !isRefreshing
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val rotationAngle by animateFloatAsState(
-                    targetValue = if (isRefreshing) 360f else 0f,
-                    label = "refresh_rotation"
-                )
-                
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "새로고침",
-                    tint = RainbowColors.Primary,
-                    modifier = Modifier.graphicsLayer(rotationZ = rotationAngle)
-                )
+                // 로고 아이콘
+                Surface(
+                    shape = CircleShape,
+                    color = RainbowColors.Primary.copy(alpha = 0.15f),
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "🌈",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    }
+                }
+
+                // 앱 타이틀
+                Column {
+                    Text(
+                        text = "색상 훈련",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Color Training",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = RainbowColors.Light.surface,
-            titleContentColor = RainbowColors.Light.onSurface
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface
         )
     )
 }
@@ -208,25 +222,53 @@ private fun GameModeCardsContent(
     ) {
         // 앱 소개 텍스트
         item {
-            Column(
-                modifier = Modifier.padding(vertical = RainbowDimens.SpaceMedium)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                ),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
-                Text(
-                    text = "색상 감각을 훈련해보세요!",
-                    style = RainbowTypography.titleLarge,
-                    color = RainbowColors.Light.onSurface,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Text(
-                    text = "3가지 게임으로 30단계의 색상 구별 능력을 기를 수 있습니다.",
-                    style = RainbowTypography.bodyMedium,
-                    color = RainbowColors.Light.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = RainbowDimens.SpaceSmall)
-                )
+                        .padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // 아이콘
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "💡",
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                    }
+
+                    // 텍스트
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "색상 감각 훈련을 시작하세요",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "3가지 게임으로 30단계 레벨 도전",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
         

@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
  */
 object RainbowColors {
     // 메인 색상 (Material 3 기반)
-    val Primary = Color(0xFF6750A4)        // 보라색 #6750A4
+    val Primary = Color(0xFF3FA9F5)        // 블루 #3FA9F5
     val Secondary = Color(0xFF625B71)      // 회색 #625B71
     val Tertiary = Color(0xFF7D5260)       // 로즈 #7D5260
     
@@ -24,7 +24,7 @@ object RainbowColors {
     
     // 게임 집중 모드 색상
     val GameBackground = Color(0xFFF8F9FA) // 연한 회색 #F8F9FA
-    val GameAccent = Color(0xFF6750A4)     // 메인 보라색
+    val GameAccent = Color(0xFF3FA9F5)     // 메인 블루 #3FA9F5
     val GameText = Color(0xFF1C1B1F)       // 검정 #1C1B1F
     
     // 라이트 테마 색상
@@ -35,13 +35,13 @@ object RainbowColors {
 }
 
 /**
- * 라이트 테마 전용 색상들
+ * 라이트 테마 전용 색상들 (블루 #3FA9F5 기반)
  */
 data class LightColors(
-    val primary: Color = Color(0xFF6750A4),
-    val onPrimary: Color = Color(0xFFFFFFFF),
-    val primaryContainer: Color = Color(0xFFEADDFF),
-    val onPrimaryContainer: Color = Color(0xFF21005D),
+    val primary: Color = Color(0xFF3FA9F5),        // 블루 #3FA9F5
+    val onPrimary: Color = Color(0xFFFFFFFF),      // 흰색
+    val primaryContainer: Color = Color(0xFFD6EFFE), // 연한 블루 #D6EFFE
+    val onPrimaryContainer: Color = Color(0xFF003F5C), // 진한 블루 #003F5C
     
     val secondary: Color = Color(0xFF625B71),
     val onSecondary: Color = Color(0xFFFFFFFF),
@@ -70,7 +70,7 @@ data class LightColors(
     val scrim: Color = Color(0xFF000000),
     val inverseSurface: Color = Color(0xFF313033),
     val inverseOnSurface: Color = Color(0xFFF4EFF4),
-    val inversePrimary: Color = Color(0xFFD0BCFF),
+    val inversePrimary: Color = Color(0xFF8FCDFF),  // 밝은 블루 (다크용)
     val surfaceDim: Color = Color(0xFFDDD8DD),
     val surfaceBright: Color = Color(0xFFFFFBFE),
     val surfaceContainerLowest: Color = Color(0xFFFFFFFF),
@@ -81,13 +81,13 @@ data class LightColors(
 )
 
 /**
- * 다크 테마 전용 색상들
+ * 다크 테마 전용 색상들 (블루 #3FA9F5 기반)
  */
 data class DarkColors(
-    val primary: Color = Color(0xFFD0BCFF),
-    val onPrimary: Color = Color(0xFF381E72),
-    val primaryContainer: Color = Color(0xFF4F378B),
-    val onPrimaryContainer: Color = Color(0xFFEADDFF),
+    val primary: Color = Color(0xFF8FCDFF),        // 밝은 블루 #8FCDFF
+    val onPrimary: Color = Color(0xFF003552),      // 진한 블루 #003552
+    val primaryContainer: Color = Color(0xFF006A94), // 중간 블루 #006A94
+    val onPrimaryContainer: Color = Color(0xFFD6EFFE), // 연한 블루 #D6EFFE
     
     val secondary: Color = Color(0xFFCCC2DC),
     val onSecondary: Color = Color(0xFF332D41),
@@ -116,7 +116,7 @@ data class DarkColors(
     val scrim: Color = Color(0xFF000000),
     val inverseSurface: Color = Color(0xFFE6E1E5),
     val inverseOnSurface: Color = Color(0xFF313033),
-    val inversePrimary: Color = Color(0xFF6750A4),
+    val inversePrimary: Color = Color(0xFF3FA9F5),  // 블루 (라이트용)
     val surfaceDim: Color = Color(0xFF10131A),
     val surfaceBright: Color = Color(0xFF383B42),
     val surfaceContainerLowest: Color = Color(0xFF0B0E14),

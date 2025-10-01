@@ -19,8 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -118,13 +117,12 @@ fun ColorDistinguishScreen(
                 .padding(16.dp)
         ) {
             /**
-             * 게임 헤더 (레벨, 점수, 홈 버튼)
+             * 게임 헤더 (레벨, 점수, 뒤로가기 버튼)
              */
             GameHeader(
                 level = uiState.level,
                 score = uiState.score,
-                onHomeClick = onNavigateBack,
-                onRestartClick = { viewModel.restartGame() }
+                onBackClick = onNavigateBack
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -197,8 +195,7 @@ fun ColorDistinguishScreen(
 private fun GameHeader(
     level: Int,
     score: Int,
-    onHomeClick: () -> Unit,
-    onRestartClick: () -> Unit,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -206,6 +203,15 @@ private fun GameHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // 뒤로가기 버튼
+        IconButton(onClick = onBackClick) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                contentDescription = "뒤로 가기",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
         // 레벨 표시
         Text(
             text = "레벨 $level",
@@ -220,24 +226,6 @@ private fun GameHeader(
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium
         )
-
-        // 버튼들
-        Row {
-            IconButton(onClick = onRestartClick) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "게임 재시작",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            IconButton(onClick = onHomeClick) {
-                Icon(
-                    imageVector = Icons.Default.Home,
-                    contentDescription = "홈으로",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }
     }
 }
 

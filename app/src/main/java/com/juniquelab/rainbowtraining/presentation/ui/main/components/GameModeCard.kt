@@ -1,11 +1,15 @@
 package com.juniquelab.rainbowtraining.presentation.ui.main.components
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,15 +20,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,9 +50,9 @@ import com.juniquelab.rainbowtraining.ui.theme.RainbowDimens
 import com.juniquelab.rainbowtraining.ui.theme.RainbowTypography
 
 /**
- * 메인 화면에서 각 게임 모드를 표시하는 카드 컴포넌트
- * 게임 타입별 진행도, 최고점수, 완료율을 시각적으로 보여준다
- * 
+ * 메인 화면에서 각 게임 모드를 표시하는 카드 컴포넌트 (깔끔한 디자인)
+ * 게임 타입별 진행도, 최고점수, 완료율을 시각화
+ *
  * @param gameDisplayInfo 게임 디스플레이 정보
  * @param onClick 카드 클릭 시 호출될 콜백
  * @param modifier 카드에 적용할 Modifier
@@ -57,235 +67,211 @@ fun GameModeCard(
 ) {
     val gameType = gameDisplayInfo.progress.gameType
     val themeColor = getGameThemeColor(gameType)
-    
-    RainbowCard(
+
+    // 진행률 애니메이션
+    val animatedProgress by animateFloatAsState(
+        targetValue = gameDisplayInfo.progress.completionRate,
+        animationSpec = tween(
+            durationMillis = 1000,
+            easing = FastOutSlowInEasing
+        ),
+        label = "progress_animation"
+    )
+
+    Card(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        onClick = if (isEnabled && gameDisplayInfo.isAvailable) onClick else null,
         enabled = isEnabled && gameDisplayInfo.isAvailable,
-        style = RainbowCardStyle.Default,
-        size = RainbowCardSize.Large
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 8.dp
+        )
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(RainbowDimens.SpaceMedium)
-        ) {
-            // 헤더 영역 (게임 제목 + 아이콘)
-            GameModeCardHeader(
-                title = gameDisplayInfo.title,
-                themeColor = themeColor,
-                isFirstTime = gameDisplayInfo.isFirstTime,
-                isEnabled = isEnabled && gameDisplayInfo.isAvailable
-            )
-            
-            // 게임 설명
-            Text(
-                text = gameDisplayInfo.description,
-                style = RainbowTypography.bodyMedium,
-                color = if (isEnabled) RainbowColors.Light.onSurfaceVariant else RainbowColors.Light.outline
-            )
-            
-            // 진행도 정보
-            GameModeCardProgress(
-                progress = gameDisplayInfo.progress,
-                themeColor = themeColor,
-                isEnabled = isEnabled
-            )
-            
-            // 통계 정보
-            GameModeCardStats(
-                progress = gameDisplayInfo.progress,
-                themeColor = themeColor,
-                isEnabled = isEnabled
-            )
-        }
-    }
-}
-
-/**
- * 게임 모드 카드의 헤더 부분
- * 게임 제목과 테마 아이콘을 표시
- */
-@Composable
-private fun GameModeCardHeader(
-    title: String,
-    themeColor: Color,
-    isFirstTime: Boolean,
-    isEnabled: Boolean
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // 게임 제목
-        Text(
-            text = title,
-            style = RainbowTypography.titleLarge.copy(fontWeight = FontWeight.Bold),
-            color = if (isEnabled) RainbowColors.Light.onSurface else RainbowColors.Light.outline
-        )
-        
-        // 상태 아이콘 (처음 시작 또는 진행 중)
-        Box(
-            modifier = Modifier
-                .size(RainbowDimens.IconSizeLarge)
-                .background(
-                    color = if (isEnabled) themeColor.copy(alpha = 0.1f) else RainbowColors.Light.surfaceVariant,
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = if (isFirstTime) Icons.Default.PlayArrow else Icons.Default.Star,
-                contentDescription = if (isFirstTime) "게임 시작" else "진행 중",
-                tint = if (isEnabled) themeColor else RainbowColors.Light.outline,
-                modifier = Modifier.size(RainbowDimens.IconSize)
-            )
-        }
-    }
-}
-
-/**
- * 게임 모드 카드의 진행도 부분
- * 완료한 레벨 수와 진행률 바를 표시
- */
-@Composable
-private fun GameModeCardProgress(
-    progress: GameProgress,
-    themeColor: Color,
-    isEnabled: Boolean
-) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(RainbowDimens.SpaceSmall)
-    ) {
-        // 진행도 텍스트
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "진행: ${progress.completedLevels}/30",
-                style = RainbowTypography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                color = if (isEnabled) RainbowColors.Light.onSurface else RainbowColors.Light.outline
-            )
-            
-            Text(
-                text = "${(progress.completionRate * 100).toInt()}%",
-                style = RainbowTypography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = if (isEnabled) themeColor else RainbowColors.Light.outline
-            )
-        }
-        
-        // 진행률 바
-        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(RainbowDimens.ProgressBarHeight),
-            shape = RoundedCornerShape(RainbowDimens.ProgressBarCornerRadius),
-            color = if (isEnabled) RainbowColors.Light.surfaceVariant else RainbowColors.Light.outline.copy(alpha = 0.3f)
+                .padding(20.dp)
         ) {
-            Box {
-                // 진행률 표시
+            // 헤더 영역 (제목 + 아이콘)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = gameDisplayInfo.title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = gameDisplayInfo.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                // 상태 아이콘
                 Surface(
+                    shape = CircleShape,
+                    color = themeColor.copy(alpha = 0.15f),
+                    modifier = Modifier.size(56.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        val iconScale by animateFloatAsState(
+                            targetValue = if (isEnabled) 1f else 0.8f,
+                            animationSpec = tween(300),
+                            label = "icon_scale"
+                        )
+
+                        Icon(
+                            imageVector = when {
+                                gameDisplayInfo.progress.completedLevels >= 30 -> Icons.Default.CheckCircle
+                                gameDisplayInfo.isFirstTime -> Icons.Default.PlayArrow
+                                else -> Icons.Default.Star
+                            },
+                            contentDescription = null,
+                            tint = themeColor,
+                            modifier = Modifier
+                                .size(28.dp)
+                                .scale(iconScale)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 진행률 표시
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "진행률",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${gameDisplayInfo.progress.completedLevels}/30 레벨",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = themeColor
+                    )
+                }
+
+                // 진행률 바
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth(progress.completionRate.coerceIn(0f, 1f))
-                        .height(RainbowDimens.ProgressBarHeight),
-                    shape = RoundedCornerShape(RainbowDimens.ProgressBarCornerRadius),
-                    color = if (isEnabled) themeColor else RainbowColors.Light.outline
-                ) {}
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(animatedProgress.coerceIn(0f, 1f))
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        themeColor.copy(alpha = 0.8f),
+                                        themeColor
+                                    )
+                                )
+                            )
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 통계 정보
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // 총점
+                StatItemCompact(
+                    label = "총점",
+                    value = gameDisplayInfo.progress.totalScore.formatScore(),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                // 구분선
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(32.dp)
+                        .background(MaterialTheme.colorScheme.outlineVariant)
+                )
+
+                // 평균 점수
+                StatItemCompact(
+                    label = "평균",
+                    value = if (gameDisplayInfo.progress.completedLevels > 0) {
+                        gameDisplayInfo.progress.averageScore.toInt().formatScore()
+                    } else "0",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                // 구분선
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(32.dp)
+                        .background(MaterialTheme.colorScheme.outlineVariant)
+                )
+
+                // 완료율
+                StatItemCompact(
+                    label = "완료율",
+                    value = "${(animatedProgress * 100).toInt()}%",
+                    color = themeColor
+                )
             }
         }
     }
 }
 
 /**
- * 게임 모드 카드의 통계 부분
- * 최고 점수와 평균 점수를 표시
+ * 간결한 통계 항목 컴포넌트
  */
 @Composable
-private fun GameModeCardStats(
-    progress: GameProgress,
-    themeColor: Color,
-    isEnabled: Boolean
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // 최고 점수
-        GameStatItem(
-            label = "최고점",
-            value = progress.totalScore.formatScore(),
-            color = if (isEnabled) themeColor else RainbowColors.Light.outline,
-            isEnabled = isEnabled
-        )
-        
-        // 구분선
-        Box(
-            modifier = Modifier
-                .width(1.dp)
-                .height(24.dp)
-                .background(
-                    color = if (isEnabled) RainbowColors.Light.outlineVariant else RainbowColors.Light.outline.copy(alpha = 0.3f)
-                )
-        )
-        
-        // 평균 점수
-        GameStatItem(
-            label = "평균점",
-            value = if (progress.completedLevels > 0) {
-                (progress.averageScore.toInt()).formatScore()
-            } else "0",
-            color = if (isEnabled) RainbowColors.Light.onSurfaceVariant else RainbowColors.Light.outline,
-            isEnabled = isEnabled
-        )
-        
-        // 구분선
-        Box(
-            modifier = Modifier
-                .width(1.dp)
-                .height(24.dp)
-                .background(
-                    color = if (isEnabled) RainbowColors.Light.outlineVariant else RainbowColors.Light.outline.copy(alpha = 0.3f)
-                )
-        )
-        
-        // 현재 레벨
-        GameStatItem(
-            label = "현재 레벨",
-            value = "${progress.currentLevel}",
-            color = if (isEnabled) RainbowColors.Primary else RainbowColors.Light.outline,
-            isEnabled = isEnabled
-        )
-    }
-}
-
-/**
- * 개별 통계 항목 컴포넌트
- */
-@Composable
-private fun GameStatItem(
+private fun StatItemCompact(
     label: String,
     value: String,
-    color: Color,
-    isEnabled: Boolean
+    color: Color
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(RainbowDimens.SpaceXSmall)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
             text = value,
-            style = RainbowTypography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
             color = color
         )
         Text(
             text = label,
-            style = RainbowTypography.labelSmall,
-            color = if (isEnabled) RainbowColors.Light.onSurfaceVariant else RainbowColors.Light.outline
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
+
 
 /**
  * 게임 타입에 따른 테마 색상 반환
@@ -295,6 +281,32 @@ private fun getGameThemeColor(gameType: GameType): Color {
         GameType.COLOR_DISTINGUISH -> RainbowColors.DistinguishGame
         GameType.COLOR_HARMONY -> RainbowColors.HarmonyGame
         GameType.COLOR_MEMORY -> RainbowColors.MemoryGame
+    }
+}
+
+/**
+ * 게임 타입에 따른 그라데이션 브러시 반환
+ */
+private fun getGameGradient(gameType: GameType): Brush {
+    return when (gameType) {
+        GameType.COLOR_DISTINGUISH -> Brush.horizontalGradient(
+            colors = listOf(
+                RainbowColors.DistinguishGame.copy(alpha = 0.9f),
+                RainbowColors.DistinguishGame.copy(alpha = 0.7f)
+            )
+        )
+        GameType.COLOR_HARMONY -> Brush.horizontalGradient(
+            colors = listOf(
+                RainbowColors.HarmonyGame.copy(alpha = 0.9f),
+                RainbowColors.HarmonyGame.copy(alpha = 0.7f)
+            )
+        )
+        GameType.COLOR_MEMORY -> Brush.horizontalGradient(
+            colors = listOf(
+                RainbowColors.MemoryGame.copy(alpha = 0.9f),
+                RainbowColors.MemoryGame.copy(alpha = 0.7f)
+            )
+        )
     }
 }
 
@@ -374,27 +386,3 @@ private fun GameModeCardPreview() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun GameModeCardHeaderPreview() {
-    MaterialTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            GameModeCardHeader(
-                title = "🎯 색상 구별",
-                themeColor = RainbowColors.DistinguishGame,
-                isFirstTime = false,
-                isEnabled = true
-            )
-            
-            GameModeCardHeader(
-                title = "🎨 색상 조합",
-                themeColor = RainbowColors.HarmonyGame,
-                isFirstTime = true,
-                isEnabled = true
-            )
-        }
-    }
-}

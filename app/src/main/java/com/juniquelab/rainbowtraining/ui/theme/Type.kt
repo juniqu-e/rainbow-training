@@ -36,6 +36,30 @@ object RainbowTypography {
     )
 
     /**
+     * 섹션 제목용 중형 헤드라인 (20sp)
+     * 서브 섹션 제목 등에 사용
+     */
+    val headlineMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
+    )
+
+    /**
+     * 섹션 제목용 소형 헤드라인 (18sp)
+     * 작은 섹션 제목 등에 사용
+     */
+    val headlineSmall = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.sp
+    )
+
+    /**
      * 카드 제목용 중형 텍스트 (20sp)
      * 게임 카드 제목, 레벨 정보 등에 사용
      */
@@ -124,12 +148,14 @@ object RainbowTypography {
  * Material 3 Typography 인스턴스
  * RainbowTypography의 스타일들을 Material 3에 매핑
  */
-val Typography = Typography(
+val RainbowMaterialTypography = Typography(
     // Display styles
     displayLarge = RainbowTypography.displayLarge,
-    
+
     // Headline styles
     headlineLarge = RainbowTypography.headlineLarge,
+    headlineMedium = RainbowTypography.headlineMedium,
+    headlineSmall = RainbowTypography.headlineSmall,
     
     // Title styles
     titleLarge = RainbowTypography.titleLarge,
@@ -142,45 +168,5 @@ val Typography = Typography(
     // Label styles
     labelLarge = RainbowTypography.labelLarge,
     labelMedium = RainbowTypography.labelMedium,
-    labelSmall = RainbowTypography.labelSmall,
-    
-    // Default styles for other Material 3 text styles
-    displayMedium = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        lineHeight = 32.sp
-    ),
-    displaySmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Bold,
-        fontSize = 20.sp,
-        lineHeight = 28.sp
-    ),
-    headlineMedium = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 20.sp,
-        lineHeight = 28.sp
-    ),
-    headlineSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 18.sp,
-        lineHeight = 24.sp
-    ),
-    titleSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        letterSpacing = 0.1.sp
-    ),
-    bodySmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.4.sp
-    )
+    labelSmall = RainbowTypography.labelSmall
 )

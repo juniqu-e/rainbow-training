@@ -180,7 +180,7 @@ fun RainbowTrainingTheme(
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = Typography,
+            typography = RainbowMaterialTypography,
             content = content
         )
     }
