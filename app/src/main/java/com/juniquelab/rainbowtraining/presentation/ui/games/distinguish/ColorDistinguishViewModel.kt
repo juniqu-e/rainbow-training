@@ -111,19 +111,31 @@ class ColorDistinguishViewModel @Inject constructor(
      * 정답 처리 및 점수 계산
      */
     private fun processAnswer() {
-        val currentState = _uiState.value
-        val isCorrect = currentState.isCorrectAnswer
-        val scoreGain = calculateScoreGain(isCorrect, currentState.difficulty)
+        viewModelScope.launch {
+            val currentState = _uiState.value
+            val isCorrect = currentState.isCorrectAnswer
+            val scoreGain = calculateScoreGain(isCorrect, currentState.difficulty)
 
-        _uiState.update { state ->
-            state.copy(score = state.score + scoreGain)
-        }
+            // 점수 업데이트
+            _uiState.update { state ->
+                state.copy(score = state.score + scoreGain)
+            }
 
-        // 정답인 경우 새로운 문제 생성, 오답인 경우 게임 종료 확인
-        if (isCorrect) {
-            generateNextChallenge()
-        } else {
-            checkGameComplete()
+            // 짧은 지연으로 정답/오답 피드백 표시
+            kotlinx.coroutines.delay(500)
+
+            // 업데이트된 점수로 게임 완료 확인
+            val updatedState = _uiState.value
+            if (updatedState.isLevelPassed) {
+                // 레벨 통과 시 즉시 게임 종료
+                completeGame()
+            } else if (updatedState.score <= 0) {
+                // 점수 0 이하 시 게임 종료
+                completeGame()
+            } else {
+                // 게임 계속 진행
+                generateNextChallenge()
+            }
         }
     }
 
@@ -168,21 +180,6 @@ class ColorDistinguishViewModel @Inject constructor(
                     // 로딩 상태 처리 (필요시)
                 }
             }
-        }
-    }
-
-    /**
-     * 게임 완료 여부 확인 및 처리
-     */
-    private fun checkGameComplete() {
-        val currentState = _uiState.value
-        
-        // 통과 점수 달성 또는 더 이상 진행이 어려운 경우 게임 종료
-        if (currentState.isLevelPassed || currentState.score <= 0) {
-            completeGame()
-        } else {
-            // 아직 기회가 있으면 새 문제 생성
-            generateNextChallenge()
         }
     }
 

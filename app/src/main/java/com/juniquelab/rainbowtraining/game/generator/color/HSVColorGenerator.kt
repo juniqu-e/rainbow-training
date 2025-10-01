@@ -14,33 +14,35 @@ class HSVColorGenerator(private val random: Random = Random.Default) {
     
     /**
      * 색상 구별 게임용 색상 세트 생성
-     * 8개의 유사한 색상 + 1개의 다른 색상을 생성한다
-     * 
-     * @param difficulty 색상 차이 정도 (0.002~0.8, 낮을수록 어려움)
+     * 8개의 동일한 색상 + 1개의 다른 색상을 생성한다
+     *
+     * @param difficulty 색상 차이 정도 (0.015~0.35, 낮을수록 어려움)
      * @return 9개 색상 리스트 (마지막이 정답 색상)
      */
     fun generateDistinguishColors(difficulty: Float): List<Color> {
         require(difficulty in 0.001f..1.0f) { "난이도는 0.001~1.0 범위여야 합니다: $difficulty" }
-        
+
         // 기준 색상을 무작위로 생성 (채도와 명도는 충분히 높게)
         val baseHsv = ColorSpaceConverter.HSV(
             hue = random.nextFloat() * 360f,
             saturation = 0.7f + random.nextFloat() * 0.3f, // 0.7~1.0
-            value = 0.7f + random.nextFloat() * 0.3f        // 0.7~1.0  
+            value = 0.7f + random.nextFloat() * 0.3f        // 0.7~1.0
         )
-        
+
         val colors = mutableListOf<Color>()
-        
-        // 8개의 유사 색상 생성 (기준 색상 주변)
+
+        // 기준 색상을 RGB로 변환
+        val baseColor = ColorSpaceConverter.hsvToRgb(baseHsv)
+
+        // 8개의 완전히 동일한 색상 추가
         repeat(8) {
-            val similarHsv = generateSimilarColor(baseHsv, difficulty * 0.3f)
-            colors.add(ColorSpaceConverter.hsvToRgb(similarHsv))
+            colors.add(baseColor)
         }
-        
-        // 1개의 구별되는 색상 생성 (충분히 다른 색상)
+
+        // 1개의 구별되는 색상 생성 (난이도에 따라 차이 조절)
         val distinctHsv = generateDistinctColor(baseHsv, difficulty)
         colors.add(ColorSpaceConverter.hsvToRgb(distinctHsv))
-        
+
         return colors
     }
     
@@ -71,27 +73,29 @@ class HSVColorGenerator(private val random: Random = Random.Default) {
     /**
      * 기준 색상과 구별되는 색상 생성
      * difficulty 값에 따라 차이의 크기를 조절한다
-     * 
+     *
      * @param baseHsv 기준 HSV 색상
-     * @param difficulty 난이도 (낮을수록 차이가 작음)
+     * @param difficulty 난이도 (0.015~0.35, 낮을수록 차이가 작음)
      * @return 구별되는 HSV 색상
      */
     private fun generateDistinctColor(baseHsv: ColorSpaceConverter.HSV, difficulty: Float): ColorSpaceConverter.HSV {
         // difficulty가 낮을수록 (어려울수록) 작은 차이
         // difficulty가 높을수록 (쉬울수록) 큰 차이
-        
-        // 색상 차이: difficulty * 180도 (최대 180도 차이)
-        val hueShift = 60f + difficulty * 120f // 60~180도 범위
-        val direction = if (random.nextBoolean()) 1f else -1f
-        val newHue = (baseHsv.hue + hueShift * direction + 360f) % 360f
-        
-        // 채도와 명도도 약간 변화 (더 확실한 구별을 위해)
-        val saturationShift = (random.nextFloat() - 0.5f) * difficulty * 0.4f
-        val valueShift = (random.nextFloat() - 0.5f) * difficulty * 0.4f
-        
-        val newSaturation = (baseHsv.saturation + saturationShift).coerceIn(0.3f, 1f)
-        val newValue = (baseHsv.value + valueShift).coerceIn(0.3f, 1f)
-        
+
+        // 색상(Hue) 차이 조절: difficulty에 비례하여 변화
+        // 난이도가 낮으면 5도 정도, 높으면 40도 정도 차이
+        val hueShift = 5f + difficulty * 100f  // 5~40도 범위
+        val hueDirection = if (random.nextBoolean()) 1f else -1f
+        val newHue = (baseHsv.hue + hueShift * hueDirection + 360f) % 360f
+
+        // 채도(Saturation) 차이: 색상 차이와 함께 변화를 줌
+        val saturationShift = difficulty * 0.15f * (if (random.nextBoolean()) 1f else -1f)
+        val newSaturation = (baseHsv.saturation + saturationShift).coerceIn(0.5f, 1f)
+
+        // 명도(Value) 차이: 색상 차이와 함께 변화를 줌
+        val valueShift = difficulty * 0.15f * (if (random.nextBoolean()) 1f else -1f)
+        val newValue = (baseHsv.value + valueShift).coerceIn(0.5f, 1f)
+
         return ColorSpaceConverter.HSV(newHue, newSaturation, newValue)
     }
     

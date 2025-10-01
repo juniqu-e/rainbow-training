@@ -12,6 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.juniquelab.rainbowtraining.domain.model.common.GameType
+import com.juniquelab.rainbowtraining.presentation.ui.game.GameResultScreen
 import com.juniquelab.rainbowtraining.presentation.ui.games.distinguish.ColorDistinguishScreen
 import com.juniquelab.rainbowtraining.presentation.ui.level.LevelSelectScreen
 import com.juniquelab.rainbowtraining.presentation.ui.main.MainScreen
@@ -233,18 +234,34 @@ fun RainbowNavigation(
             val level = backStackEntry.getIntArg(Screen.GameResult.ARG_LEVEL)
             val score = backStackEntry.getIntArg(Screen.GameResult.ARG_SCORE)
             val isPass = backStackEntry.getBooleanArg(Screen.GameResult.ARG_IS_PASS)
-            
+
             if (gameType != null && level != null && score != null && isPass != null &&
                 NavigationUtils.isValidGameResultArgs(
                     gameType.name, level.toString(), score.toString(), isPass.toString()
                 )) {
-                
-                // TODO: GameResultScreen 구현 후 추가
-                // 현재는 임시로 레벨 선택 화면으로 이동
-                navController.navigate(Screen.LevelSelect.createRoute(gameType)) {
-                    popUpTo(Screen.LevelSelect.route) { inclusive = true }
-                }
-                
+
+                GameResultScreen(
+                    gameType = gameType,
+                    level = level,
+                    score = score,
+                    isPass = isPass,
+                    onNavigateToLevelSelect = {
+                        navController.navigate(Screen.LevelSelect.createRoute(gameType)) {
+                            popUpTo(Screen.Main.route) { inclusive = false }
+                        }
+                    },
+                    onNavigateToNextLevel = {
+                        navController.navigate(Screen.Game.createRoute(gameType, level + 1)) {
+                            popUpTo(Screen.LevelSelect.route) { inclusive = false }
+                        }
+                    },
+                    onRetryLevel = {
+                        navController.navigate(Screen.Game.createRoute(gameType, level)) {
+                            popUpTo(Screen.LevelSelect.route) { inclusive = false }
+                        }
+                    }
+                )
+
             } else {
                 // 유효하지 않은 매개변수인 경우 메인 화면으로 이동
                 navController.navigate(Screen.Main.route) {
