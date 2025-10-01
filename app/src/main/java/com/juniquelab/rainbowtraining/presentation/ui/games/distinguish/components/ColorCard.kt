@@ -17,11 +17,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -44,10 +46,21 @@ fun ColorCard(
     modifier: Modifier = Modifier
 ) {
     /**
-     * 클릭 애니메이션을 위한 스케일 상태
+     * 클릭 애니메이션을 위한 일시적인 스케일 상태
+     * 클릭 후 150ms 뒤 자동으로 원상복구
      */
     var isPressed by remember { mutableStateOf(false) }
-    
+
+    /**
+     * 클릭 효과를 일시적으로만 적용하기 위한 LaunchedEffect
+     */
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            delay(150) // 150ms 후 자동으로 원상복구
+            isPressed = false
+        }
+    }
+
     /**
      * 선택 상태에 따른 스케일 애니메이션
      */
