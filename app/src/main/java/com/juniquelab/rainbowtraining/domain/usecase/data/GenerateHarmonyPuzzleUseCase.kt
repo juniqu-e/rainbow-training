@@ -32,7 +32,8 @@ class GenerateHarmonyPuzzleUseCase @Inject constructor(
             // 레벨 유효성 검증
             require(level in 1..30) { "레벨은 1~30 범위여야 합니다: $level" }
             
-            // 레벨에 따른 난이도 계산
+            // 레벨에 따른 난이도 계산 (하위 호환용)
+            @Suppress("DEPRECATION")
             val difficulty = levelCalculator.getDifficultyForLevel(level)
             
             // 조화 타입 결정 (레벨에 따라 보색/유사색 비율 조절)

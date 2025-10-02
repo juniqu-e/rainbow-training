@@ -1,6 +1,7 @@
 package com.juniquelab.rainbowtraining.domain.model.progress
 
 import com.juniquelab.rainbowtraining.domain.model.common.GameType
+import com.juniquelab.rainbowtraining.game.util.GameConstants
 import kotlinx.datetime.Instant
 
 /**
@@ -51,13 +52,15 @@ data class GameProgress(
     
     /**
      * 특정 레벨이 해금되었는지 확인
-     * - 레벨 1은 항상 해금
+     * - 테스트용: 각 난이도별 첫 레벨은 항상 해금 (1, 6, 11, 16, 21, 26)
      * - 그 외는 이전 레벨이 완료되어야 해금
      */
     fun isLevelUnlocked(level: Int, requiredScores: Map<Int, Int>): Boolean {
         return when {
-            level <= 1 -> true
+            level <= 0 -> false
             level > 30 -> false
+            // 테스트용: 각 난이도별 첫 레벨은 항상 해금
+            level in GameConstants.Level.INITIAL_UNLOCKED_LEVELS -> true
             else -> {
                 val previousLevel = level - 1
                 val previousRequiredScore = requiredScores[previousLevel] ?: return false

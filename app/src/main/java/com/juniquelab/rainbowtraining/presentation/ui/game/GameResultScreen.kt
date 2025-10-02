@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.juniquelab.rainbowtraining.domain.model.common.GameType
+import com.juniquelab.rainbowtraining.game.engine.level.LevelCalculator
 
 /**
  * 게임 결과 화면
@@ -68,9 +69,6 @@ fun GameResultScreen(
         animationSpec = tween(durationMillis = 500),
         label = "scale"
     )
-
-    // 통과 점수 계산
-    val requiredScore = 50 + (level - 1) * 10
 
     Column(
         modifier = modifier
@@ -134,7 +132,7 @@ fun GameResultScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "획득 점수",
+                    text = if (isPass) "최종 점수" else "획득 점수",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -151,9 +149,9 @@ fun GameResultScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "통과 점수: $requiredScore",
+                    text = if (isPass) "5문제 전부 정답!" else "정답을 맞추지 못했습니다",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (isPass) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error
                 )
             }
         }

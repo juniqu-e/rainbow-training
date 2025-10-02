@@ -36,6 +36,7 @@ class GetUnlockedLevelsUseCase @Inject constructor(
                     
                     // 각 레벨별 상세 정보 생성
                     val levels = (1..30).map { level ->
+                        @Suppress("DEPRECATION")
                         Level(
                             level = level,
                             difficulty = LevelCalculator.getDifficultyForLevel(level),

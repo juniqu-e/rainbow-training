@@ -7,6 +7,7 @@ import com.juniquelab.rainbowtraining.domain.usecase.level.GetGameProgressUseCas
 import com.juniquelab.rainbowtraining.domain.usecase.level.GetUnlockedLevelsUseCase
 import com.juniquelab.rainbowtraining.game.engine.level.LevelCalculator
 import com.juniquelab.rainbowtraining.game.generator.color.HSVColorGenerator
+import com.juniquelab.rainbowtraining.game.generator.color.OKLCHColorGenerator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,7 +32,7 @@ object UseCaseModule {
     }
 
     /**
-     * HSV 색상 생성기 제공
+     * HSV 색상 생성기 제공 (하위 호환용)
      */
     @Provides
     @ViewModelScoped
@@ -40,15 +41,24 @@ object UseCaseModule {
     }
 
     /**
+     * OKLCH 색상 생성기 제공 (메인)
+     */
+    @Provides
+    @ViewModelScoped
+    fun provideOKLCHColorGenerator(): OKLCHColorGenerator {
+        return OKLCHColorGenerator()
+    }
+
+    /**
      * 색상 구별 챌린지 생성 UseCase
+     * OKLCH 기반으로 전환
      */
     @Provides
     @ViewModelScoped
     fun provideGenerateColorChallengeUseCase(
-        hsvColorGenerator: HSVColorGenerator,
-        levelCalculator: LevelCalculator
+        oklchColorGenerator: OKLCHColorGenerator
     ): GenerateColorChallengeUseCase {
-        return GenerateColorChallengeUseCase(hsvColorGenerator, levelCalculator)
+        return GenerateColorChallengeUseCase(oklchColorGenerator)
     }
 
     /**

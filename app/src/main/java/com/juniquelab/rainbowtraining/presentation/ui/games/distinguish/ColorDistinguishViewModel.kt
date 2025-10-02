@@ -6,6 +6,7 @@ import com.juniquelab.rainbowtraining.domain.model.common.GameType
 import com.juniquelab.rainbowtraining.domain.model.game.games.ColorDistinguishState
 import com.juniquelab.rainbowtraining.domain.usecase.data.GenerateColorChallengeUseCase
 import com.juniquelab.rainbowtraining.domain.usecase.level.CompleteLevelUseCase
+import com.juniquelab.rainbowtraining.game.util.GameConstants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,10 +32,22 @@ class ColorDistinguishViewModel @Inject constructor(
         ColorDistinguishState(
             level = 1,
             requiredScore = 50,
-            difficulty = 0.8f
+            difficulty = 0.8f,
+            currentQuestion = 0,
+            totalQuestions = GameConstants.Level.QUESTIONS_PER_LEVEL
         )
     )
     val uiState: StateFlow<ColorDistinguishState> = _uiState.asStateFlow()
+
+    /**
+     * 현재 레벨의 문제 번호 (1~5)
+     */
+    private var currentQuestionNumber = 1
+
+    /**
+     * 전체 게임 누적 점수
+     */
+    private var totalScore = 0
 
     /**
      * 게임 완료 상태 (결과 화면으로 이동하기 위한 상태)
@@ -62,6 +75,8 @@ class ColorDistinguishViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
+            currentQuestionNumber = 1
+            totalScore = 0
 
             // 레벨별 색상 챌린지 생성
             when (val result = generateColorChallengeUseCase(level)) {
@@ -75,7 +90,11 @@ class ColorDistinguishViewModel @Inject constructor(
                             selectedIndex = null,
                             score = 0,
                             requiredScore = colorChallenge.requiredScore,
-                            difficulty = colorChallenge.difficulty
+                            difficulty = colorChallenge.difficulty,
+                            currentQuestion = currentQuestionNumber,
+                            totalQuestions = GameConstants.Level.QUESTIONS_PER_LEVEL,
+                            questionStartTime = System.currentTimeMillis(),
+                            isFailed = false
                         )
                     }
                 }
@@ -86,7 +105,7 @@ class ColorDistinguishViewModel @Inject constructor(
                     // 로딩 상태는 이미 처리됨
                 }
             }
-            
+
             _isLoading.value = false
         }
     }
@@ -96,15 +115,21 @@ class ColorDistinguishViewModel @Inject constructor(
      * @param selectedIndex 사용자가 선택한 색상의 인덱스 (0~8)
      */
     fun selectColor(selectedIndex: Int) {
+        // 유효성 검사
         if (selectedIndex !in 0..8) return
         if (_uiState.value.hasSelectedColor) return // 이미 선택한 경우 무시
+        if (_isLoading.value) return // 로딩 중에는 선택 불가
 
-        _uiState.update { currentState ->
-            currentState.copy(selectedIndex = selectedIndex)
+        try {
+            _uiState.update { currentState ->
+                currentState.copy(selectedIndex = selectedIndex)
+            }
+
+            // 정답 여부에 따른 점수 계산 및 게임 진행
+            processAnswer()
+        } catch (e: Exception) {
+            _errorMessage.value = "색상 선택 처리 중 오류가 발생했습니다: ${e.message}"
         }
-
-        // 정답 여부에 따른 점수 계산 및 게임 진행
-        processAnswer()
     }
 
     /**
@@ -114,104 +139,183 @@ class ColorDistinguishViewModel @Inject constructor(
         viewModelScope.launch {
             val currentState = _uiState.value
             val isCorrect = currentState.isCorrectAnswer
-            val scoreGain = calculateScoreGain(isCorrect, currentState.difficulty)
 
-            // 점수 업데이트
-            _uiState.update { state ->
-                state.copy(score = state.score + scoreGain)
+            // 한 문제라도 틀리면 즉시 실패
+            if (!isCorrect) {
+                _uiState.update { state ->
+                    state.copy(isFailed = true)
+                }
+
+                // 짧은 지연으로 오답 피드백 표시
+                kotlinx.coroutines.delay(GameConstants.GamePlay.FEEDBACK_DELAY_MS)
+
+                // 즉시 게임 종료 (최종 점수는 현재까지의 totalScore)
+                completeGame()
+                return@launch
             }
 
-            // 짧은 지연으로 정답/오답 피드백 표시
-            kotlinx.coroutines.delay(500)
+            // 정답인 경우: 시간 기반 점수 계산
+            val answerTime = System.currentTimeMillis()
+            val elapsedTime = answerTime - currentState.questionStartTime
+            val questionScore = calculateTimeBasedScore(elapsedTime)
 
-            // 업데이트된 점수로 게임 완료 확인
-            val updatedState = _uiState.value
-            if (updatedState.isLevelPassed) {
-                // 레벨 통과 시 즉시 게임 종료
-                completeGame()
-            } else if (updatedState.score <= 0) {
-                // 점수 0 이하 시 게임 종료
+            // 누적 점수에 추가
+            totalScore += questionScore
+
+            // UI 상태 업데이트 (현재 획득 점수를 score에 표시)
+            _uiState.update { state ->
+                state.copy(score = totalScore)
+            }
+
+            // 짧은 지연으로 정답 피드백 표시
+            kotlinx.coroutines.delay(GameConstants.GamePlay.FEEDBACK_DELAY_MS)
+
+            // 문제 번호 증가
+            currentQuestionNumber++
+
+            // 5문제 완료 확인
+            if (currentQuestionNumber > GameConstants.Level.QUESTIONS_PER_LEVEL) {
+                // 모든 문제를 맞춘 경우 게임 성공
                 completeGame()
             } else {
-                // 게임 계속 진행
+                // 다음 문제로 진행
                 generateNextChallenge()
             }
         }
     }
 
     /**
-     * 점수 획득량 계산
-     * @param isCorrect 정답 여부
-     * @param difficulty 현재 난이도
-     * @return 획득할 점수
+     * 시간 기반 점수 계산
+     * - 기본 점수: 10점
+     * - 0.5초 이내: +10점 (총 20점)
+     * - 0.5초 초과: 0.5초마다 -1점 (최소 10점)
+     *
+     * @param elapsedTimeMs 문제 시작부터 답변까지 경과 시간 (밀리초)
+     * @return 획득 점수
      */
-    private fun calculateScoreGain(isCorrect: Boolean, difficulty: Float): Int {
-        return if (isCorrect) {
-            // 난이도가 높을수록 더 많은 점수 (기본 10점 + 난이도 보너스)
-            val baseScore = 10
-            val difficultyBonus = ((1.0f - difficulty) * 20).toInt()
-            baseScore + difficultyBonus
-        } else {
-            -5 // 오답 시 감점
+    private fun calculateTimeBasedScore(elapsedTimeMs: Long): Int {
+        val baseScore = GameConstants.Score.BASE_SCORE_PER_QUESTION
+        val maxBonus = GameConstants.Score.MAX_TIME_BONUS
+        val interval = GameConstants.Score.BONUS_DECREASE_INTERVAL_MS
+        val decreaseAmount = GameConstants.Score.BONUS_DECREASE_PER_INTERVAL
+
+        // 0.5초 이내면 최대 보너스
+        if (elapsedTimeMs <= interval) {
+            return baseScore + maxBonus
         }
+
+        // 0.5초 초과 시 매 0.5초마다 1점씩 감소
+        val intervalsElapsed = (elapsedTimeMs / interval).toInt()
+        val bonus = (maxBonus - (intervalsElapsed - 1) * decreaseAmount).coerceAtLeast(0)
+
+        return baseScore + bonus
     }
+
 
     /**
      * 다음 문제 생성
      */
     private fun generateNextChallenge() {
         viewModelScope.launch {
-            val currentState = _uiState.value
-            when (val result = generateColorChallengeUseCase(currentState.level)) {
-                is com.juniquelab.rainbowtraining.domain.model.common.Result.Success -> {
-                    val colorChallenge = result.data
-                    _uiState.update { state ->
-                        state.copy(
-                            colors = colorChallenge.colors,
-                            correctIndex = colorChallenge.correctIndex,
-                            selectedIndex = null
-                        )
+            try {
+                val currentState = _uiState.value
+
+                // 문제 번호 유효성 검사
+                if (currentQuestionNumber > GameConstants.Level.QUESTIONS_PER_LEVEL) {
+                    // 이미 5문제 완료한 경우 게임 종료
+                    completeGame()
+                    return@launch
+                }
+
+                when (val result = generateColorChallengeUseCase(currentState.level)) {
+                    is com.juniquelab.rainbowtraining.domain.model.common.Result.Success -> {
+                        val colorChallenge = result.data
+                        _uiState.update { state ->
+                            state.copy(
+                                colors = colorChallenge.colors,
+                                correctIndex = colorChallenge.correctIndex,
+                                selectedIndex = null,
+                                currentQuestion = currentQuestionNumber,
+                                totalQuestions = GameConstants.Level.QUESTIONS_PER_LEVEL,
+                                questionStartTime = System.currentTimeMillis() // 새 문제 시작 시간 기록
+                            )
+                        }
+                    }
+                    is com.juniquelab.rainbowtraining.domain.model.common.Result.Error -> {
+                        _errorMessage.value = "새 문제 생성 중 오류가 발생했습니다: ${result.exception.message}"
+                        // 오류 발생 시 게임 종료
+                        completeGame()
+                    }
+                    is com.juniquelab.rainbowtraining.domain.model.common.Result.Loading -> {
+                        // 로딩 상태 처리 (필요시)
                     }
                 }
-                is com.juniquelab.rainbowtraining.domain.model.common.Result.Error -> {
-                    _errorMessage.value = "새 문제 생성 중 오류가 발생했습니다: ${result.exception.message}"
-                }
-                is com.juniquelab.rainbowtraining.domain.model.common.Result.Loading -> {
-                    // 로딩 상태 처리 (필요시)
-                }
+            } catch (e: Exception) {
+                _errorMessage.value = "문제 생성 중 예외 발생: ${e.message}"
+                completeGame()
             }
         }
     }
 
     /**
      * 게임 완료 처리
+     * 5문제를 모두 맞췄거나, 한 문제라도 틀린 경우 호출됨
      */
     private fun completeGame() {
         viewModelScope.launch {
-            val currentState = _uiState.value
-            
-            when (val result = completeLevelUseCase(
-                gameType = GameType.COLOR_DISTINGUISH,
-                level = currentState.level,
-                score = currentState.score
-            )) {
-                is com.juniquelab.rainbowtraining.domain.model.common.Result.Success -> {
-                    val completeResult = result.data
-                    _gameCompleteState.value = GameCompleteState(
-                        level = currentState.level,
-                        finalScore = currentState.score,
-                        requiredScore = currentState.requiredScore,
-                        isPass = completeResult.isPass,
-                        isNewBestScore = completeResult.isNewBestScore,
-                        nextLevelUnlocked = completeResult.nextLevelUnlocked
-                    )
+            try {
+                val currentState = _uiState.value
+
+                // 최종 점수는 누적된 totalScore
+                val finalScore = totalScore.coerceAtLeast(0)
+
+                // 성공 여부: 5문제를 모두 맞춘 경우만 성공 (점수는 기록용)
+                val isSuccess = !currentState.isFailed
+
+                when (val result = completeLevelUseCase(
+                    gameType = GameType.COLOR_DISTINGUISH,
+                    level = currentState.level,
+                    score = finalScore
+                )) {
+                    is com.juniquelab.rainbowtraining.domain.model.common.Result.Success -> {
+                        val completeResult = result.data
+                        _gameCompleteState.value = GameCompleteState(
+                            level = currentState.level,
+                            finalScore = finalScore,
+                            requiredScore = currentState.requiredScore,
+                            isPass = isSuccess,
+                            isNewBestScore = completeResult.isNewBestScore,
+                            nextLevelUnlocked = completeResult.nextLevelUnlocked && isSuccess
+                        )
+                    }
+                    is com.juniquelab.rainbowtraining.domain.model.common.Result.Error -> {
+                        _errorMessage.value = "게임 완료 처리 중 오류가 발생했습니다: ${result.exception.message}"
+                        // 오류가 발생해도 기본 완료 상태는 설정
+                        _gameCompleteState.value = GameCompleteState(
+                            level = currentState.level,
+                            finalScore = finalScore,
+                            requiredScore = currentState.requiredScore,
+                            isPass = isSuccess,
+                            isNewBestScore = false,
+                            nextLevelUnlocked = false
+                        )
+                    }
+                    is com.juniquelab.rainbowtraining.domain.model.common.Result.Loading -> {
+                        // 로딩 상태 처리 (필요시)
+                    }
                 }
-                is com.juniquelab.rainbowtraining.domain.model.common.Result.Error -> {
-                    _errorMessage.value = "게임 완료 처리 중 오류가 발생했습니다: ${result.exception.message}"
-                }
-                is com.juniquelab.rainbowtraining.domain.model.common.Result.Loading -> {
-                    // 로딩 상태 처리 (필요시)
-                }
+            } catch (e: Exception) {
+                _errorMessage.value = "게임 완료 처리 중 예외 발생: ${e.message}"
+                // 예외 발생 시에도 기본 완료 상태 설정
+                val currentState = _uiState.value
+                _gameCompleteState.value = GameCompleteState(
+                    level = currentState.level,
+                    finalScore = totalScore.coerceAtLeast(0),
+                    requiredScore = currentState.requiredScore,
+                    isPass = false,
+                    isNewBestScore = false,
+                    nextLevelUnlocked = false
+                )
             }
         }
     }
